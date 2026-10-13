@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0B1120" />
+    <title>SmartPark | Tổng quan bãi đỗ</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Bỏ qua điều hướng</a>
+
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Điều hướng và bộ lọc">
+        <a class="brand" th:href="@{/}" aria-label="SmartPark, tổng quan">
+          <span class="brand-mark" aria-hidden="true">
+            <i class="fa-solid fa-square-parking"></i>
+          </span>
+          <span class="brand-name">SmartPark</span>
+        </a>
+
+        <nav class="primary-nav" aria-label="Điều hướng chính">
+          <a class="nav-link is-active" th:href="@{/}" aria-current="page">
+            <i class="fa-solid fa-grid-2" aria-hidden="true"></i>
+            <span>Tổng quan</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-divider"></div>
+
+        <section class="control-section" aria-labelledby="time-title">
+          <div class="section-heading">
+            <h2 id="time-title">Thời gian đặt chỗ</h2>
+            <i class="fa-regular fa-calendar-days" aria-hidden="true"></i>
+          </div>
+          <p class="control-note">
+            Các trường thời gian chưa được kết nối với API đặt chỗ.
+          </p>
+          <div class="field">
+            <label for="booking-date">Ngày đặt</label>
+            <input type="date" id="booking-date" />
+          </div>
+          <div class="field-grid">
+            <div class="field">
+              <label for="booking-time-start">Từ giờ</label>
+              <input type="time" id="booking-time-start" value="08:00" />
+            </div>
+            <div class="field">
+              <label for="booking-time-end">Đến giờ</label>
+              <input type="time" id="booking-time-end" value="18:00" />
+            </div>
+          </div>
+        </section>
+
+        <section class="control-section filter-section" aria-labelledby="filter-title">
+          <div class="section-heading">
+            <h2 id="filter-title">Lọc vị trí</h2>
+            <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+          </div>
+          <div class="filter-list" role="group" aria-label="Lọc vị trí đỗ">
+            <button class="filter-button is-active" type="button" id="btn-filter-all" data-filter="all" aria-pressed="true">Tất cả</button>
+            <button class="filter-button" type="button" id="btn-filter-zoneA" data-filter="zoneA" aria-pressed="false">Khu A</button>
+            <button class="filter-button" type="button" id="btn-filter-zoneB" data-filter="zoneB" aria-pressed="false">Khu B</button>
+            <button class="filter-button" type="button" id="btn-filter-vip" data-filter="vip" aria-pressed="false">VIP</button>
+            <button class="filter-button" type="button" id="btn-filter-empty" data-filter="empty" aria-pressed="false">Trống</button>
+          </div>
+        </section>
+
+        <section class="control-section selected-section" aria-labelledby="selected-title">
+          <div class="section-heading">
+            <h2 id="selected-title">Vị trí đã chọn</h2>
+            <span class="selected-count" id="selected-badge" aria-live="polite">0</span>
+          </div>
+          <div class="selected-list" id="selected-list" aria-live="polite">
+            <p class="empty-selection">Chọn một vị trí còn trống trên sơ đồ.</p>
+          </div>
+          <button class="text-button" type="button" id="clear-selected" disabled>
+            Bỏ chọn tất cả
+          </button>
+          <p class="reservation-note">
+            Chỉ xem trước lựa chọn. Hệ thống hiện chưa có thao tác xác nhận đặt chỗ.
+          </p>
+        </section>
+      </aside>
+
+      <div class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="breadcrumb">SmartPark <span aria-hidden="true">/</span> Tổng quan</p>
+            <h1>Quản lý bãi đỗ xe</h1>
+            <p class="page-description">Theo dõi trạng thái các vị trí từ dữ liệu hệ thống.</p>
+          </div>
+          <span class="data-source">
+            <i class="fa-solid fa-database" aria-hidden="true"></i>
+            Dữ liệu hệ thống
+          </span>
+        </header>
+
+        <main class="main-content" id="main-content">
+          <section class="overview-section" aria-labelledby="overview-title">
+            <div class="content-heading">
+              <div>
+                <h2 id="overview-title">Tổng quan vị trí</h2>
+                <p>Số liệu theo trạng thái hiện tại của từng chỗ đỗ.</p>
+              </div>
+            </div>
+
+            <div class="stats-grid">
+              <article class="stat-item">
+                <span class="stat-label">Tổng số chỗ</span>
+                <strong class="stat-value" id="stat-total" th:text="${tongO}">0</strong>
+                <span class="stat-detail">Trong hệ thống</span>
+              </article>
+              <article class="stat-item stat-available">
+                <span class="stat-label">Còn trống</span>
+                <strong class="stat-value" id="stat-available" th:text="${conTrong}">0</strong>
+                <span class="stat-detail">Trạng thái sẵn sàng</span>
+              </article>
+              <article class="stat-item stat-occupied">
+                <span class="stat-label">Đang có xe</span>
+                <strong class="stat-value" id="stat-occupied" th:text="${daDo}">0</strong>
+                <span class="stat-detail">Trạng thái đang sử dụng</span>
+              </article>
+            </div>
+          </section>
+
+          <section class="map-panel" aria-labelledby="map-title">
+            <div class="map-heading">
+              <div>
+                <h2 id="map-title">Sơ đồ bãi đỗ</h2>
+                <p>Mỗi vị trí được hiển thị theo dữ liệu thực tế.</p>
+              </div>
+              <div class="map-legend" aria-label="Chú giải sơ đồ">
+                <span class="legend-item"><i class="legend-swatch status-available" aria-hidden="true"></i>Trống</span>
+                <span class="legend-item"><i class="legend-swatch status-occupied" aria-hidden="true"></i>Đang có xe</span>
+                <span class="legend-item"><i class="legend-swatch status-reserved" aria-hidden="true"></i>Đã đặt</span>
+                <span class="legend-item"><i class="legend-swatch status-maintenance" aria-hidden="true"></i>Bảo trì</span>
+                <span class="legend-item"><i class="legend-swatch type-vip" aria-hidden="true"></i>VIP</span>
+                <span class="legend-item"><i class="legend-swatch type-priority" aria-hidden="true"></i>Ưu tiên</span>
+              </div>
+            </div>
+
+            <div class="parking-map">
+              <section class="parking-zone" data-parking-zone="A" aria-labelledby="zone-a-title" th:if="${tongO > 0}">
+                <div class="zone-heading">
+                  <div>
+                    <h3 id="zone-a-title">Khu A</h3>
+                    <p>Vị trí tiêu chuẩn và VIP theo cấu hình bãi đỗ.</p>
+                  </div>
+                </div>
+
+                <div class="slot-group" th:if="${not #lists.isEmpty(khuA)}">
+                  <h4>Vị trí khác</h4>
+                  <div class="slot-grid">
+                    <button th:each="slot : ${khuA}"
+                      th:id="'spot-' + ${slot.code}"
+                      th:class="'parking-slot status--' + ${#strings.toLowerCase(slot.status.name())}"
+                      th:classappend="${slot.slotType.name() == 'VIP'} ? ' type--vip' : (${slot.slotType.name() == 'PRIORITY'} ? ' type--priority' : '')"
+                      th:attr="data-code=${slot.code},data-zone=${slot.zone},data-type=${slot.slotType.name()},data-status=${slot.status.name()}"
+                      th:disabled="${slot.status.name() != 'AVAILABLE'}"
+                      type="button" aria-pressed="false">
+                      <span class="slot-code" th:text="${slot.code}">A01</span>
+                      <span class="slot-status" th:text="${slot.status.name() == 'AVAILABLE' ? 'Trống' : (slot.status.name() == 'OCCUPIED' ? 'Đang có xe' : (slot.status.name() == 'RESERVED' ? 'Đã đặt' : 'Bảo trì'))}">Trống</span>
+                      <span class="slot-type" th:if="${slot.slotType.name() == 'STANDARD'}">Tiêu chuẩn</span>
+                      <span class="slot-type" th:if="${slot.slotType.name() == 'VIP'}">VIP</span>
+                      <span class="slot-type" th:if="${slot.slotType.name() == 'PRIORITY'}">Ưu tiên</span>
+                      <span class="slot-type" th:if="${slot.slotType.name() == 'CAR'}">Ô tô</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="slot-group vip-group" th:if="${not #lists.isEmpty(khuAVip)}">
+                  <h4>Vị trí VIP</h4>
+                  <div class="slot-grid">
+                    <button th:each="slot : ${khuAVip}"
+                      th:id="'spot-' + ${slot.code}"
+                      th:class="'parking-slot status--' + ${#strings.toLowerCase(slot.status.name())} + ' type--vip'"
+                      th:attr="data-code=${slot.code},data-zone=${slot.zone},data-type=${slot.slotType.name()},data-status=${slot.status.name()}"
+                      th:disabled="${slot.status.name() != 'AVAILABLE'}"
+                      type="button" aria-pressed="false">
+                      <span class="slot-code" th:text="${slot.code}">A01</span>
+                      <span class="slot-status" th:text="${slot.status.name() == 'AVAILABLE' ? 'Trống' : (slot.status.name() == 'OCCUPIED' ? 'Đang có xe' : (slot.status.name() == 'RESERVED' ? 'Đã đặt' : 'Bảo trì'))}">Trống</span>
+                      <span class="slot-type">VIP</span>
+                    </button>
+                  </div>
+                </div>
+
+                <p class="zone-empty" th:if="${#lists.isEmpty(khuA) and #lists.isEmpty(khuAVip)}">Không có vị trí trong khu vực này.</p>
+              </section>
+
+              <div class="drive-lane" aria-hidden="true" th:if="${tongO > 0}">
+                <span><i class="fa-solid fa-arrow-right-long"></i> LỐI LƯU THÔNG</span>
+                <span><i class="fa-solid fa-arrow-right-long"></i></span>
+              </div>
+
+              <section class="parking-zone" data-parking-zone="B" aria-labelledby="zone-b-middle-title" th:if="${tongO > 0}">
+                <div class="zone-heading">
+                  <div>
+                    <h3 id="zone-b-middle-title">Khu B <span class="zone-subtitle">Dãy giữa</span></h3>
+                    <p>Các vị trí được cấp cho dãy giữa trong hệ thống.</p>
+                  </div>
+                </div>
+                <div class="slot-grid" th:if="${not #lists.isEmpty(khuBGiua)}">
+                  <button th:each="slot : ${khuBGiua}"
+                    th:id="'spot-' + ${slot.code}"
+                    th:class="'parking-slot status--' + ${#strings.toLowerCase(slot.status.name())}"
+                    th:classappend="${slot.slotType.name() == 'VIP'} ? ' type--vip' : (${slot.slotType.name() == 'PRIORITY'} ? ' type--priority' : '')"
+                    th:attr="data-code=${slot.code},data-zone=${slot.zone},data-type=${slot.slotType.name()},data-status=${slot.status.name()}"
+                    th:disabled="${slot.status.name() != 'AVAILABLE'}"
+                    type="button" aria-pressed="false">
+                    <span class="slot-code" th:text="${slot.code}">B01</span>
+                    <span class="slot-status" th:text="${slot.status.name() == 'AVAILABLE' ? 'Trống' : (slot.status.name() == 'OCCUPIED' ? 'Đang có xe' : (slot.status.name() == 'RESERVED' ? 'Đã đặt' : 'Bảo trì'))}">Trống</span>
+                    <span class="slot-type" th:if="${slot.slotType.name() == 'STANDARD'}">Tiêu chuẩn</span>
+                    <span class="slot-type" th:if="${slot.slotType.name() == 'VIP'}">VIP</span>
+                    <span class="slot-type" th:if="${slot.slotType.name() == 'PRIORITY'}">Ưu tiên</span>
+                    <span class="slot-type" th:if="${slot.slotType.name() == 'CAR'}">Ô tô</span>
+                  </button>
+                </div>
+                <p class="zone-empty" th:if="${#lists.isEmpty(khuBGiua)}">Không có vị trí trong dãy này.</p>
+              </section>
+
+              <div class="drive-lane" aria-hidden="true" th:if="${tongO > 0}">
+                <span><i class="fa-solid fa-arrow-right-long"></i> LỐI LƯU THÔNG</span>
+                <span><i class="fa-solid fa-arrow-right-long"></i></span>
+              </div>
+
+              <section class="parking-zone" data-parking-zone="B" aria-labelledby="zone-b-lower-title" th:if="${tongO > 0}">
+                <div class="zone-heading">
+                  <div>
+                    <h3 id="zone-b-lower-title">Khu B <span class="zone-subtitle">Dãy dưới</span></h3>
+                    <p>Các vị trí được cấp cho dãy dưới trong hệ thống.</p>
+                  </div>
+                </div>
+                <div class="slot-grid" th:if="${not #lists.isEmpty(khuBDuoi)}">
+                  <button th:each="slot : ${khuBDuoi}"
+                    th:id="'spot-' + ${slot.code}"
+                    th:class="'parking-slot status--' + ${#strings.toLowerCase(slot.status.name())}"
+                    th:classappend="${slot.slotType.name() == 'VIP'} ? ' type--vip' : (${slot.slotType.name() == 'PRIORITY'} ? ' type--priority' : '')"
+                    th:attr="data-code=${slot.code},data-zone=${slot.zone},data-type=${slot.slotType.name()},data-status=${slot.status.name()}"
+                    th:disabled="${slot.status.name() != 'AVAILABLE'}"
+                    type="button" aria-pressed="false">
+                    <span class="slot-code" th:text="${slot.code}">B29</span>
+                    <span class="slot-status" th:text="${slot.status.name() == 'AVAILABLE' ? 'Trống' : (slot.status.name() == 'OCCUPIED' ? 'Đang có xe' : (slot.status.name() == 'RESERVED' ? 'Đã đặt' : 'Bảo trì'))}">Trống</span>
+                    <span class="slot-type" th:if="${slot.slotType.name() == 'STANDARD'}">Tiêu chuẩn</span>
+                    <span class="slot-type" th:if="${slot.slotType.name() == 'VIP'}">VIP</span>
+                    <span class="slot-type" th:if="${slot.slotType.name() == 'PRIORITY'}">Ưu tiên</span>
+                    <span class="slot-type" th:if="${slot.slotType.name() == 'CAR'}">Ô tô</span>
+                  </button>
+                </div>
+                <p class="zone-empty" th:if="${#lists.isEmpty(khuBDuoi)}">Không có vị trí trong dãy này.</p>
+              </section>
+
+              <p class="map-empty" th:if="${tongO == 0}">
+                Chưa có vị trí đỗ nào được đăng ký trong hệ thống.
+              </p>
+
+              <div class="entrance">
+                <i class="fa-solid fa-arrow-right-to-bracket" aria-hidden="true"></i>
+                <span>Cổng vào</span>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script th:src="@{/js/home.js}" defer></script>
+  </body>
+</html>
