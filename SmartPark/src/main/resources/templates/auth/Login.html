@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Đăng nhập | SmartPark</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <link rel="stylesheet" th:href="@{/css/auth.css}" />
+    <link rel="stylesheet" th:href="@{/css/fontfamily.css}" />
+  </head>
+  <body class="auth-page">
+    <main class="auth-shell">
+      <a class="brand" th:href="@{/}" aria-label="SmartPark, trang chủ">
+        <span class="brand-mark" aria-hidden="true">P</span>
+        <span class="brand-name">SmartPark</span>
+      </a>
+      <section class="auth-panel" aria-labelledby="login-title">
+        <h1 id="login-title">Đăng nhập</h1>
+        <p class="auth-intro">Đăng nhập để tiếp tục sử dụng SmartPark.</p>
+        <p class="inline-message success-message" role="status" th:if="${registrationSuccess}" th:text="${registrationSuccess}"></p>
+        <p class="inline-message error-message" role="alert" th:if="${param.error}">Email hoặc mật khẩu không chính xác.</p>
+        <p class="inline-message success-message" role="status" th:if="${param.logout}">Bạn đã đăng xuất.</p>
+        <form th:action="@{/login}" method="post" class="auth-form">
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" autocomplete="username" required />
+          </div>
+          <div class="field">
+            <label for="password">Mật khẩu</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" required />
+          </div>
+          <button class="button button-primary button-full" type="submit">Đăng nhập</button>
+        </form>
+        <p class="auth-footer">Chưa có tài khoản? <a th:href="@{/register}">Tạo tài khoản</a></p>
+      </section>
+    </main>
+  </body>
+</html>

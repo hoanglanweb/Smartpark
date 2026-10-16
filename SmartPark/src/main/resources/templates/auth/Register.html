@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tạo tài khoản | SmartPark</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <link rel="stylesheet" th:href="@{/css/auth.css}" />
+    <link rel="stylesheet" th:href="@{/css/fontfamily.css}" />
+  </head>
+  <body class="auth-page">
+    <main class="auth-shell">
+      <a class="brand" th:href="@{/}" aria-label="SmartPark, trang chủ">
+        <span class="brand-mark" aria-hidden="true">P</span>
+        <span class="brand-name">SmartPark</span>
+      </a>
+      <section class="auth-panel" aria-labelledby="register-title">
+        <h1 id="register-title">Tạo tài khoản</h1>
+        <p class="auth-intro">Đăng ký tài khoản khách để đặt chỗ tại bãi xe.</p>
+        <p class="inline-message error-message" role="alert" th:if="${registerError}" th:text="${registerError}"></p>
+        <form th:action="@{/register}" th:object="${registerForm}" method="post" class="auth-form">
+          <div class="field">
+            <label for="fullName">Họ và tên</label>
+            <input id="fullName" th:field="*{fullName}" type="text" autocomplete="name" maxlength="100" required />
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" th:field="*{email}" type="email" autocomplete="email" maxlength="150" required />
+          </div>
+          <div class="field">
+            <label for="phone">Số điện thoại</label>
+            <input id="phone" th:field="*{phone}" type="tel" autocomplete="tel" maxlength="20" />
+          </div>
+          <div class="field">
+            <label for="password">Mật khẩu</label>
+            <input id="password" th:field="*{password}" type="password" autocomplete="new-password" minlength="8" required />
+          </div>
+          <div class="field">
+            <label for="confirmPassword">Xác nhận mật khẩu</label>
+            <input id="confirmPassword" th:field="*{confirmPassword}" type="password" autocomplete="new-password" minlength="8" required />
+          </div>
+          <button class="button button-primary button-full" type="submit">Tạo tài khoản</button>
+        </form>
+        <p class="auth-footer">Đã có tài khoản? <a th:href="@{/login}">Đăng nhập</a></p>
+      </section>
+    </main>
+  </body>
+</html>

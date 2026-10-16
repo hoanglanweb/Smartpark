@@ -7,9 +7,11 @@ import com.example.SmartPark.model.Reservation;
 import com.example.SmartPark.repository.ParkingSlotRepository;
 import com.example.SmartPark.repository.ReservationRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class ParkingSlotService {
@@ -33,6 +35,7 @@ public class ParkingSlotService {
     }
 
     //?: Lấy danh sách tất cả đỗ xe. 
+    @Transactional(readOnly = true)
     public List<ParkingSlot> getAll() {
         return slotRepo.findAll();
     }
@@ -44,21 +47,34 @@ public class ParkingSlotService {
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy ô " + code));
     }
 
+    @Transactional(readOnly = true)
+    public ParkingSlot getById(Long slotId) {
+        if (slotId == null || slotId <= 0) {
+            throw new IllegalArgumentException("Cần chọn một vị trí đỗ hợp lệ");
+        }
+        return slotRepo.findById(slotId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy vị trí đỗ"));
+    }
+
     //?:** Bộ lọc giao diện: all | A | B | VIP | free */
+    @Transactional(readOnly = true)
     public List<ParkingSlot> filter(String filter) {
-        if (filter == null)
+        if (filter == null || filter.isBlank()) {
             return getAll();
-        //!: Chuyển đổi từ khóa về chữ thường để so sanh và đưa ra các trường hợp 
+        }
+
         return switch (filter.toLowerCase()) {
-            case "a" -> slotRepo.findByZone("A");
-            case "b" -> slotRepo.findByZone("B");
+            case "a", "zonea" -> slotRepo.findByZone("A");
+            case "b", "zoneb" -> slotRepo.findByZone("B");
             case "vip" -> slotRepo.findBySlotType(SlotType.VIP);
-                                    //!: Lọc trạng thái ô trống sẵn sàng.
-            case "free", "trong" -> slotRepo.findByStatus(SlotStatus.AVAILABLE);
+            case "free", "empty", "trong" -> slotRepo.findByStatus(SlotStatus.AVAILABLE);
+            case "all" -> getAll();
             default -> getAll();
         };
     }
+
     //?: Thống kê số lượng ô đỗ xe trong hệ thống.
+    @Transactional(readOnly = true)
     public Stats getStats() {
         return new Stats(
                 //!: tổng ô đỗ xe 
@@ -68,15 +84,38 @@ public class ParkingSlotService {
     }
 
     //?:** Tìm kiếm danh sách các ô đỗ xe thời trống thực tế
+    @Transactional(readOnly = true)
     public List<ParkingSlot> findFreeSlots(LocalDateTime start, LocalDateTime end) {
-        return slotRepo.findAll().stream()
-                .filter(s -> s.getStatus() != SlotStatus.MAINTENANCE)
-                .filter(s -> !isReserved(s.getId(), start, end))
+        validateTimeWindow(start, end);
+        List<ParkingSlot> available = slotRepo.findByStatus(SlotStatus.AVAILABLE);
+        if (available.isEmpty()) {
+            return available;
+        }
+
+        List<Long> slotIds = available.stream().map(slot -> slot.getId()).toList();
+        Set<Long> reservedSlotIds = Set.copyOf(
+                reservationRepo.findReservedSlotIds(slotIds, ACTIVE_RESERVATIONS, end, start));
+
+        return available.stream()
+                .filter(slot -> !reservedSlotIds.contains(slot.getId()))
                 .toList();
+    }
+
+    public void validateTimeWindow(LocalDateTime start, LocalDateTime end) {
+        if (start == null || end == null || !end.isAfter(start)) {
+            throw new IllegalArgumentException("Giờ kết thúc phải sau giờ bắt đầu");
+        }
+        if (start.isBefore(LocalDateTime.now().minusMinutes(1))) {
+            throw new IllegalArgumentException("Không thể đặt chỗ trong quá khứ");
+        }
     }
 
     //?:** true nếu ô đã có đặt chỗ trùng khoảng thời gian */
     public boolean isReserved(Long slotId, LocalDateTime start, LocalDateTime end) {
+        if (slotId == null) {
+            throw new IllegalArgumentException("Cần chọn một vị trí đỗ");
+        }
+        validateTimeWindow(start, end);
         return reservationRepo
                 //!: Gọi hàm truy vấn nhanh từ Repository để kiểm tra sự tồn tại của bản ghi trùng lịch
                 //!: Giải thích logic so sánh thời gian trùng: (Thời gian bắt đầu < end) VÀ (Thời gian kết thúc > start)
@@ -85,8 +124,12 @@ public class ParkingSlotService {
     }
 
     //?:Cập nhật trạng thái mới cho một ô đỗ xe dựa trên ID. */
+    @Transactional
     public void updateStatus(Long slotId, SlotStatus status) {
-        ParkingSlot slot = slotRepo.findById(slotId)
+        if (slotId == null || status == null) {
+            throw new IllegalArgumentException("Vị trí và trạng thái là bắt buộc");
+        }
+        ParkingSlot slot = slotRepo.findByIdForUpdate(slotId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy ô id=" + slotId));
         slot.setStatus(status);
         slotRepo.save(slot);

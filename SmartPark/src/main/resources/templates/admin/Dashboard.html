@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Quản trị | SmartPark</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+  </head>
+  <body class="admin-page">
+    <header class="admin-header">
+      <a class="brand" th:href="@{/admin/dashboard}" aria-label="SmartPark, quản trị">
+        <span class="brand-mark" aria-hidden="true">P</span>
+        <span class="brand-name">SmartPark</span>
+      </a>
+      <form th:action="@{/logout}" method="post">
+        <button class="button button-secondary" type="submit">Đăng xuất</button>
+      </form>
+    </header>
+    <main class="admin-main">
+      <section class="admin-heading">
+        <h1>Quản lý bãi đỗ</h1>
+        <p>Theo dõi tình trạng vị trí và thao tác lượt xe tại bãi.</p>
+      </section>
+      <p class="inline-message success-message" role="status"
+         th:if="${parkingOperationSuccess != null}" th:text="${parkingOperationSuccess}"></p>
+      <p class="inline-message error-message" role="alert"
+         th:if="${parkingOperationError != null}" th:text="${parkingOperationError}"></p>
+      <section class="admin-stats" aria-label="Thống kê vị trí đỗ xe">
+        <article class="admin-stat">
+          <span>Tổng vị trí</span>
+          <strong th:text="${totalSlots}">0</strong>
+        </article>
+        <article class="admin-stat">
+          <span>Còn trống</span>
+          <strong th:text="${availableSlots}">0</strong>
+        </article>
+        <article class="admin-stat">
+          <span>Đang có xe</span>
+          <strong th:text="${occupiedSlots}">0</strong>
+        </article>
+      </section>
+      <a class="button button-primary" th:href="@{/user/parking}">Mở sơ đồ bãi đỗ</a>
+    </main>
+  </body>
+</html>

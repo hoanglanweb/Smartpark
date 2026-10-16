@@ -1,0 +1,216 @@
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#F4F3EE" />
+    <meta
+      name="description"
+      content="SmartPark giúp bạn tìm bãi đỗ xe, xem sơ đồ vị trí và gửi yêu cầu đặt chỗ trực tuyến thuận tiện."
+    />
+    <meta name="robots" content="index, follow" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="SmartPark | Chủ động chọn chỗ đỗ xe" />
+    <meta
+      property="og:description"
+      content="Tìm bãi phù hợp, xem sơ đồ vị trí và đặt chỗ đỗ xe trực tuyến cùng SmartPark."
+    />
+    <meta property="og:locale" content="vi_VN" />
+
+    <title>SmartPark | Chủ động chọn chỗ đỗ xe</title>
+    <link rel="stylesheet" th:href="@{/css/landing.css}" />
+    <link rel="stylesheet" th:href="@{/css/fontfamily.css}" />
+  </head>
+
+  <body class="landing-page">
+    <a class="landing-skip-link" href="#main-content">
+      Bỏ qua điều hướng, đến nội dung chính
+    </a>
+
+    <header class="landing-header">
+      <a class="landing-brand" th:href="@{/}" aria-label="SmartPark, trang chủ">
+        <span class="landing-brand-mark" aria-hidden="true">P</span>
+        <span>SmartPark</span>
+      </a>
+
+      <nav class="landing-nav" aria-label="Điều hướng chính">
+        <a class="landing-nav-link" href="#benefits">Lợi ích</a>
+        <a class="landing-nav-link" href="#how-it-works">Cách đặt chỗ</a>
+        <a class="landing-login" th:href="@{/login}">Đăng nhập</a>
+      </nav>
+    </header>
+
+    <main id="main-content">
+      <section class="landing-hero" aria-labelledby="landing-title">
+        <div class="landing-copy">
+          <p class="landing-kicker">Nền tảng quản lý bãi đỗ xe</p>
+
+          <h1 id="landing-title">Chọn chỗ đỗ  Đi chủ động</h1>
+
+          <p class="landing-description">
+            Tìm bãi phù hợp, xem sơ đồ vị trí và gửi yêu cầu đặt chỗ trực tuyến
+            trước khi khởi hành.
+          </p>
+
+          <div class="landing-actions">
+            <a
+              class="landing-button landing-button-primary"
+              th:href="@{/register}"
+            >
+              Bắt đầu đặt chỗ
+              <span aria-hidden="true">↗</span>
+            </a>
+
+            <a
+              class="landing-button landing-button-secondary"
+              th:href="@{/login}"
+            >
+              Đăng nhập
+            </a>
+          </div>
+
+          <p class="landing-note">
+            Chủ động lựa chọn vị trí và thời gian đỗ xe.
+          </p>
+        </div>
+
+        <figure class="landing-visual">
+          <img
+            th:src="@{/images/smartpark-parking.jpg}"
+            alt="Toàn cảnh bãi đỗ xe với các vị trí được kẻ vạch rõ ràng"
+            width="1600"
+            height="1000"
+            fetchpriority="high"
+          />
+          <figcaption class="landing-visual-caption">
+            SmartPark — Quản lý chỗ đỗ theo cách đơn giản hơn.
+          </figcaption>
+        </figure>
+      </section>
+
+      <section
+        class="landing-benefits"
+        id="benefits"
+        aria-labelledby="benefits-title"
+      >
+        <div class="benefits-intro">
+          <p class="landing-kicker">Trải nghiệm SmartPark</p>
+          <h2 id="benefits-title">
+            Mọi thông tin cần thiết, trong một quy trình.
+          </h2>
+          <p>
+            Theo dõi vị trí, lựa chọn khung giờ và quản lý thông tin đặt chỗ
+            thuận tiện hơn.
+          </p>
+        </div>
+
+        <div class="benefits-list">
+          <article class="benefit-item">
+            <span class="benefit-number" aria-hidden="true">01</span>
+            <h3>Quan sát sơ đồ bãi đỗ</h3>
+            <p>Xem bố cục các vị trí để lựa chọn chỗ đỗ phù hợp với nhu cầu.</p>
+          </article>
+
+          <article class="benefit-item">
+            <span class="benefit-number" aria-hidden="true">02</span>
+            <h3>Lựa chọn thời gian</h3>
+            <p>Chủ động chọn khung giờ dự kiến và gửi thông tin đặt chỗ.</p>
+          </article>
+
+          <article class="benefit-item">
+            <span class="benefit-number" aria-hidden="true">03</span>
+            <h3>Quản lý thông tin đặt chỗ</h3>
+            <p>
+              Thuận tiện theo dõi thông tin liên quan đến yêu cầu đặt chỗ của
+              bạn.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section
+        class="landing-process"
+        id="how-it-works"
+        aria-labelledby="process-title"
+      >
+        <div class="process-intro">
+          <p class="landing-kicker">Quy trình sử dụng</p>
+          <h2 id="process-title">Đặt chỗ gọn trong ba bước.</h2>
+          <p>
+            Từ lúc tìm bãi đến khi gửi yêu cầu đặt chỗ, các bước đều dễ theo
+            dõi.
+          </p>
+        </div>
+
+        <ol class="process-list">
+          <li>
+            <span class="process-step" aria-hidden="true">01</span>
+            <h3>Tìm bãi</h3>
+            <p>Xem các bãi đỗ có trong hệ thống.</p>
+          </li>
+
+          <li>
+            <span class="process-step" aria-hidden="true">02</span>
+            <h3>Chọn vị trí</h3>
+            <p>Kiểm tra sơ đồ và chọn chỗ phù hợp.</p>
+          </li>
+
+          <li>
+            <span class="process-step" aria-hidden="true">03</span>
+            <h3>Gửi đặt chỗ</h3>
+            <p>Chọn thời gian rồi xác nhận thông tin đặt chỗ.</p>
+          </li>
+        </ol>
+      </section>
+
+      <section class="landing-closing" aria-labelledby="closing-title">
+        <p class="landing-kicker">Bắt đầu cùng SmartPark</p>
+        <h2 id="closing-title">Sẵn sàng chủ động cho chuyến đi?</h2>
+        <p>
+          Tạo tài khoản để bắt đầu trải nghiệm quy trình tìm và đặt chỗ đỗ xe.
+        </p>
+
+        <a class="landing-button landing-button-primary" th:href="@{/register}">
+          Bắt đầu đặt chỗ
+          <span aria-hidden="true">↗</span>
+        </a>
+      </section>
+    </main>
+
+    <footer class="landing-footer">
+      <div class="landing-footer-inner">
+        <div class="landing-footer-info">
+          <a
+            class="landing-brand landing-footer-brand"
+            th:href="@{/}"
+            aria-label="SmartPark, trang chủ"
+          >
+            <span class="landing-brand-mark" aria-hidden="true">P</span>
+            <span>SmartPark</span>
+          </a>
+
+          <p>Quản lý bãi đỗ xe trực tuyến.</p>
+        </div>
+
+        <nav class="landing-footer-links" aria-label="Điều hướng cuối trang">
+          <a th:href="@{/}">Trang chủ</a>
+          <a href="#benefits">Lợi ích</a>
+          <a href="#how-it-works">Cách đặt chỗ</a>
+          <a th:href="@{/login}">Đăng nhập</a>
+          <a th:href="@{/register}">Đăng ký</a>
+        </nav>
+      </div>
+
+      <div class="landing-footer-bottom">
+        <p>
+          ©
+          <span th:text="${#dates.year(#dates.createNow())}">2026</span>
+          SmartPark. All rights reserved.
+        </p>
+
+        <p>Đỗ xe dễ dàng, hành trình thuận tiện.</p>
+      </div>
+    </footer>
+    <script th:src="@{/js/animation.js}" defer></script>
+  </body>
+</html>

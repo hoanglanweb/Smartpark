@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Không có quyền truy cập | SmartPark</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <link rel="stylesheet" th:href="@{/css/fontfamily.css}" />
+  </head>
+  <body class="auth-page">
+    <main class="auth-shell">
+      <a class="brand" th:href="@{/}" aria-label="SmartPark, trang chủ">
+        <span class="brand-mark" aria-hidden="true">P</span>
+        <span class="brand-name">SmartPark</span>
+      </a>
+      <section class="auth-panel" aria-labelledby="denied-title">
+        <h1 id="denied-title">Không có quyền truy cập</h1>
+        <p class="auth-intro">Tài khoản hiện tại không được phép mở trang này.</p>
+        <a class="button button-primary button-full" th:href="@{/}">Về trang chủ</a>
+      </section>
+    </main>
+  </body>
+</html>

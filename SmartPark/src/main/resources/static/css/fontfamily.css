@@ -1,0 +1,11 @@
+* {
+    font-family: "JetBrains Mono", monospace;
+    font-optical-sizing: auto;
+    font-weight: 900;
+    font-style: normal;
+    /* Tăng độ mượt cho chữ trên màn hình (đặc biệt là trên macOS/Windows) */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Tối ưu hóa hiển thị chữ số (giúp các số thẳng hàng đẹp hơn trong bảng hoặc code) */
+    font-feature-settings: "liga"on, "calt"on;
+}

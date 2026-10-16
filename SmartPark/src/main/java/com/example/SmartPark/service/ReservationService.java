@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Locale;
 import java.util.List;
 
 @Service
@@ -33,33 +36,106 @@ public class ReservationService {
     //?: Tạo mới một đơn đặt chỗ ô đỗ xe.
     @Transactional
     public Reservation create(Long userId, Long vehicleId, Long slotId,
+            LocalDate date, LocalTime startTime, LocalTime endTime) {
+        if (date == null || startTime == null || endTime == null) {
+            throw new IllegalArgumentException("Ngày và thời gian đặt chỗ là bắt buộc");
+        }
+        return create(userId, vehicleId, slotId, date.atTime(startTime), date.atTime(endTime));
+    }
+
+    @Transactional
+    public Reservation createGuest(String fullName, String phone, String plateNumber,
+            Vehicle.VehicleType vehicleType, Long slotId,
+            LocalDate date, LocalTime startTime, LocalTime endTime) {
+        if (date == null || startTime == null || endTime == null) {
+            throw new IllegalArgumentException("Ngày và thời gian đặt chỗ là bắt buộc");
+        }
+        return createGuest(fullName, phone, plateNumber, vehicleType, slotId,
+                date.atTime(startTime), date.atTime(endTime));
+    }
+
+    @Transactional
+    public Reservation createGuest(String fullName, String phone, String plateNumber,
+            Vehicle.VehicleType vehicleType, Long slotId,
             LocalDateTime start, LocalDateTime end) {
-        //!: kiểm tra tính hợp lệ của thời gian đặt chỗ
-        //!: isAfter(): kiểm tra mốc thời này có sau mốc thời gian kia ko  
-        if (start == null || end == null || !end.isAfter(start))
-            throw new IllegalArgumentException("Giờ kết thúc phải sau giờ bắt đầu");
+        String normalizedName = fullName == null ? "" : fullName.trim();
+        String normalizedPhone = phone == null ? "" : phone.trim();
+        String normalizedPlate = plateNumber == null ? "" : plateNumber.trim().toUpperCase(Locale.ROOT);
+        if (normalizedName.isBlank() || normalizedName.length() > 100) {
+            throw new IllegalArgumentException("Họ tên là bắt buộc và không vượt quá 100 ký tự");
+        }
+        if (!normalizedPhone.matches("[+0-9() .-]{7,20}")
+                || normalizedPhone.replaceAll("[^0-9]", "").length() < 7) {
+            throw new IllegalArgumentException("Số điện thoại không hợp lệ");
+        }
+        if (normalizedPlate.isBlank() || normalizedPlate.length() > 20) {
+            throw new IllegalArgumentException("Biển số xe là bắt buộc và không vượt quá 20 ký tự");
+        }
+        if (vehicleType == null) {
+            throw new IllegalArgumentException("Cần chọn loại phương tiện");
+        }
+        slotService.validateTimeWindow(start, end);
+        if (slotId == null || slotId <= 0) {
+            throw new IllegalArgumentException("Cần chọn một vị trí đỗ hợp lệ");
+        }
 
-        //!: isBefore(): Kiểm tra mốc thời gian này có trước mốc thời gian kia không
-        //!: minusMinutes(1): Trừ đi 1 phút (bù trừ độ trễ mạng)
-        if (start.isBefore(LocalDateTime.now().minusMinutes(1)))
-            throw new IllegalArgumentException("Không thể đặt chỗ trong quá khứ");
+        ParkingSlot slot = slotRepo.findByIdForUpdate(slotId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy vị trí đỗ"));
+        if (slot.getStatus() != ParkingSlot.SlotStatus.AVAILABLE) {
+            throw new IllegalStateException("Ô " + slot.getCode() + " hiện không còn trống");
+        }
+        if (slotService.isReserved(slotId, start, end)) {
+            throw new IllegalStateException("Ô " + slot.getCode() + " đã được giữ trong khoảng thời gian này");
+        }
 
-        //!: Tìm và kiếm tra các thực thể trong database (Ném lỗi nếu ko thấy)
+        Vehicle vehicle = vehicleRepo.findByPlateNumber(normalizedPlate)
+                .orElseGet(() -> {
+                    Vehicle newVehicle = new Vehicle();
+                    newVehicle.setPlateNumber(normalizedPlate);
+                    newVehicle.setVehicleType(vehicleType);
+                    return vehicleRepo.save(newVehicle);
+                });
+        if (vehicle.getVehicleType() != vehicleType) {
+            throw new IllegalArgumentException("Loại phương tiện không khớp với biển số xe đã lưu");
+        }
+
+        Reservation reservation = new Reservation();
+        reservation.setGuestName(normalizedName);
+        reservation.setGuestPhone(normalizedPhone);
+        reservation.setVehicle(vehicle);
+        reservation.setSlot(slot);
+        reservation.setStartTime(start);
+        reservation.setEndTime(end);
+        reservation.setStatus(Reservation.Status.PENDING);
+        return reservationRepo.save(reservation);
+    }
+
+    @Transactional
+    public Reservation create(Long userId, Long vehicleId, Long slotId,
+            LocalDateTime start, LocalDateTime end) {
+        slotService.validateTimeWindow(start, end);
+        if (userId == null || vehicleId == null || slotId == null
+                || userId <= 0 || vehicleId <= 0 || slotId <= 0) {
+            throw new IllegalArgumentException("Người dùng, xe và vị trí đỗ là bắt buộc");
+        }
+
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng"));
         Vehicle vehicle = vehicleRepo.findById(vehicleId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy xe"));
-        ParkingSlot slot = slotRepo.findById(slotId)
+        if (vehicle.getOwner() != null && !vehicle.getOwner().getId().equals(userId)) {
+            throw new IllegalArgumentException("Xe đã chọn không thuộc người dùng này");
+        }
+        ParkingSlot slot = slotRepo.findByIdForUpdate(slotId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy ô đỗ"));
 
-        if (slot.getStatus() == ParkingSlot.SlotStatus.MAINTENANCE)
-            throw new IllegalStateException("Ô " + slot.getCode() + " đang bảo trì");
+        if (slot.getStatus() != ParkingSlot.SlotStatus.AVAILABLE) {
+            throw new IllegalStateException("Ô " + slot.getCode() + " hiện không còn trống");
+        }
 
-        //?: Chặn đặt trùng vị trí trong cùng khoảng thời gian
         if (slotService.isReserved(slotId, start, end))
             throw new IllegalStateException("Ô " + slot.getCode() + " đã được giữ trong khoảng thời gian này");
-        
-        //?; Khởi tạo đơn đặt chỗ mới với trạng thái PENDING (Chờ xử lý)
+
         Reservation r = new Reservation();
         r.setUser(user);
         r.setVehicle(vehicle);
@@ -68,7 +144,6 @@ public class ReservationService {
         r.setEndTime(end);
         r.setStatus(Reservation.Status.PENDING);
 
-        //!: lưu trữ và trả về dối tượng 
         return reservationRepo.save(r);
     }
 
@@ -91,8 +166,24 @@ public class ReservationService {
         return reservationRepo.save(r);
     }
 
+    @Transactional(readOnly = true)
     public List<Reservation> getByUser(Long userId) {
         return reservationRepo.findByUserIdOrderByStartTimeDesc(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Reservation> getRecent() {
+        return reservationRepo.findTop20ByOrderByCreatedAtDesc();
+    }
+
+    @Transactional(readOnly = true)
+    public List<User> getUsers() {
+        return userRepo.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Vehicle> getVehicles() {
+        return vehicleRepo.findAll();
     }
 
     private Reservation find(Long id) {

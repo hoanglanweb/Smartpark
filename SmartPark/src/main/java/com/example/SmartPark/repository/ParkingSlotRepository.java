@@ -5,6 +5,8 @@ import com.example.SmartPark.model.ParkingSlot.SlotStatus;
 import com.example.SmartPark.model.ParkingSlot.SlotType;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,6 +18,9 @@ public interface ParkingSlotRepository
 
     // Tìm ô theo mã: A01, B01...
     Optional<ParkingSlot> findByCode(String code);
+
+    @Query(value = "select * from parking_slots where id = :id for update", nativeQuery = true)
+    Optional<ParkingSlot> findByIdForUpdate(@Param("id") Long id);
 
     // Lấy toàn bộ ô theo khu A hoặc B
     List<ParkingSlot> findByZone(String zone);

@@ -10,8 +10,11 @@ public class Vehicle {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 20)
+    @Column(name = "plate_number", nullable = false, unique = true, length = 20)
     private String plateNumber;
+
+    @Column(name = "license_plate", nullable = false, unique = true, length = 20)
+    private String licensePlate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -27,7 +30,11 @@ public class Vehicle {
     public void setId(Long id) { this.id = id; }
 
     public String getPlateNumber() { return plateNumber; }
-    public void setPlateNumber(String plateNumber) { this.plateNumber = plateNumber; }
+    public void setPlateNumber(String plateNumber) {
+        this.plateNumber = plateNumber;
+        this.licensePlate = plateNumber;
+    }
+    public String getLicensePlate() { return licensePlate; }
 
     public VehicleType getVehicleType() { return vehicleType; }
     public void setVehicleType(VehicleType vehicleType) { this.vehicleType = vehicleType; }

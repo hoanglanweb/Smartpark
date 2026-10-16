@@ -1,0 +1,49 @@
+.auth-shell {
+  display: grid;
+  justify-items: center;
+  gap: 28px;
+  width: min(440px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 40px 0;
+}
+
+.auth-panel {
+  width: 100%;
+  padding: 30px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.auth-panel h1,
+.admin-heading h1 {
+  margin: 0;
+  font-size: 30px;
+  letter-spacing: -0.035em;
+}
+
+.auth-intro {
+  margin: 8px 0 22px;
+  color: var(--muted);
+}
+
+.auth-form {
+  display: grid;
+  gap: 18px;
+}
+
+.auth-form .field input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #8b918b;
+  border-radius: 6px;
+  padding: 9px 11px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.auth-footer {
+  margin: 20px 0 0;
+  color: var(--muted);
+  text-align: center;
+}

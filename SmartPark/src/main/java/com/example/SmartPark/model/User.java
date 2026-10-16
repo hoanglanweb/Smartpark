@@ -27,6 +27,9 @@ public class User {
     @Column(nullable = false, length = 20)
     private Role role = Role.CUSTOMER;
 
+    @Column(name = "STATUS", nullable = false, length = 20)
+    private String status = "ACTIVE";
+
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public User() {}
@@ -48,6 +51,9 @@ public class User {
 
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
