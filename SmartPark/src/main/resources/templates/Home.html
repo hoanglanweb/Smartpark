@@ -36,14 +36,15 @@
             <i class="fa-regular fa-calendar-check" aria-hidden="true"></i><span>Đặt chỗ</span>
           </a>
         </nav>
-        <div class="sidebar-user"
-            th:if="${#authentication != null
-                    and #authentication.authenticated
-                    and #authentication.name != 'anonymousUser'}">
-
-            <span>Xin chào, </span>
-            <strong th:text="${#authentication.name}">Username</strong>
+    
+        <div class="username" th:if="${fullname != null}">
+          <span>Xin Chào, </span>
+          <strong th:text="${fullname}">User</strong>
         </div>
+         <a class="button button-secondary vehicle-registration-link"
+             th:href="@{/vehicles/new(slotId=${guestReservationForm.slotId})}">
+            <i class="fa-solid fa-car-side" aria-hidden="true"></i>Đăng ký xe
+         </a>
         <form th:action="@{/logout}" method="post" class="sidebar-logout">
           <button class="button button-secondary button-full" type="submit">Đăng xuất</button>
         </form>
@@ -136,6 +137,7 @@
         <main class="main-content" id="main-content">
           <p class="inline-message success-message" id="reservation-notice" role="status" hidden></p>
           <p class="inline-message success-message" role="status" th:if="${reservationSuccess != null}" th:text="${reservationSuccess}"></p>
+          <p class="inline-message success-message" role="status" th:if="${vehicleRegistrationSuccess != null}" th:text="${vehicleRegistrationSuccess}"></p>
           <p class="inline-message error-message" role="alert" th:if="${reservationError != null}" th:text="${reservationError}"></p>
           <p class="inline-message success-message" role="status" th:if="${parkingOperationSuccess != null}" th:text="${parkingOperationSuccess}"></p>
           <p class="inline-message error-message" role="alert" th:if="${parkingOperationError != null}" th:text="${parkingOperationError}"></p>
@@ -195,12 +197,12 @@
               <section class="parking-zone" aria-labelledby="zone-a-title"
                        th:if="${not #lists.isEmpty(khuA) or not #lists.isEmpty(khuAVip)}">
                 <div class="zone-heading">
-                  <div><h3 id="zone-a-title">Khu A</h3><p>Vị trí theo phân khu và loại chỗ đã cấu hình.</p></div>
+                  <div><h3 id="zone-a-title">Khu A</h3></div>
                   <span class="zone-count" th:text="${#lists.size(khuA) + #lists.size(khuAVip)} + ' vị trí'">0 vị trí</span>
                 </div>
                 <div class="slot-group" th:if="${not #lists.isEmpty(khuAVip)}">
                   <h4>Vị trí VIP</h4>
-                  <div class="slot-grid">
+                  <div class="slot-grid" id="slot-grid-vip">
                     <button th:each="slot : ${khuAVip}" type="button" th:data-slot-id="${slot.id}"
                       th:aria-label="${slot.code + ', ' + (availabilitySearch and slot.status.name() == 'AVAILABLE' and !availableSlotIds.contains(slot.id) ? 'Không khả dụng trong thời gian đã chọn' : (slot.status.name() == 'AVAILABLE' ? 'Còn trống' : (slot.status.name() == 'OCCUPIED' ? 'Đang có xe' : (slot.status.name() == 'RESERVED' ? 'Đã đặt' : 'Bảo trì'))))}"
                       aria-pressed="false"
@@ -233,7 +235,7 @@
 
               <section class="parking-zone" aria-labelledby="zone-b-middle-title" th:if="${not #lists.isEmpty(khuBGiua)}">
                 <div class="zone-heading">
-                  <div><h3 id="zone-b-middle-title">Khu B <span class="zone-subtitle">Dãy giữa</span></h3><p>Vị trí theo dữ liệu dãy và mã chỗ đỗ.</p></div>
+                  <div><h3 id="zone-b-middle-title">Khu B /<span class="zone-subtitle">Dãy giữa </span></h3></div>
                   <span class="zone-count" th:text="${#lists.size(khuBGiua)} + ' vị trí'">0 vị trí</span>
                 </div>
                 <div class="slot-grid">
@@ -255,7 +257,7 @@
 
               <section class="parking-zone" aria-labelledby="zone-b-lower-title" th:if="${not #lists.isEmpty(khuBDuoi)}">
                 <div class="zone-heading">
-                  <div><h3 id="zone-b-lower-title">Khu B <span class="zone-subtitle">Dãy dưới</span></h3><p>Vị trí theo dữ liệu dãy và mã chỗ đỗ.</p></div>
+                  <div><h3 id="zone-b-lower-title">Khu B /<span class="zone-subtitle">Dãy dưới</span></h3></div>
                   <span class="zone-count" th:text="${#lists.size(khuBDuoi)} + ' vị trí'">0 vị trí</span>
                 </div>
                 <div class="slot-grid">
@@ -359,7 +361,7 @@
       <div class="dialog-heading">
         <div>
           <p class="breadcrumb">SmartPark <span aria-hidden="true">/</span> Đặt chỗ</p>
-          <h2 id="booking-dialog-title">Thông tin khách hàng</h2>
+          <h2 id="booking-dialog-title">Chọn phương tiện</h2>
         </div>
         <button class="dialog-close" id="close-booking" type="button" aria-label="Đóng cửa sổ đặt chỗ">
           <i class="fa-solid fa-xmark" aria-hidden="true"></i>
@@ -368,28 +370,24 @@
       <p class="dialog-selected-slot">Vị trí đã chọn: <strong id="dialog-slot-code"></strong></p>
       <p class="inline-message error-message" id="booking-error" role="alert" hidden></p>
       <p class="inline-message success-message" id="booking-success" role="status" hidden></p>
+      <div th:if="${#lists.isEmpty(vehicles)}">
+        <p class="form-guidance">Bạn chưa đăng ký xe. Vui lòng đăng ký xe trước khi đặt chỗ.</p>
+        <a class="button button-secondary" id="register-vehicle-link"
+           th:href="@{/vehicles/new}" data-registration-url="/vehicles/new">Đăng ký xe</a>
+      </div>
       <form class="guest-reservation-form" id="guest-reservation-form"
             th:action="@{/reservations/guest}" th:object="${guestReservationForm}" method="post">
         <input type="hidden" id="booking-slot-id" th:field="*{slotId}" />
-        <div class="field">
-          <label for="guest-full-name">Họ và tên</label>
-          <input id="guest-full-name" type="text" th:field="*{fullName}" maxlength="100" autocomplete="name" required />
-        </div>
-        <div class="field">
-          <label for="guest-phone">Số điện thoại</label>
-          <input id="guest-phone" type="tel" th:field="*{phone}" maxlength="20" autocomplete="tel" inputmode="tel" required />
-        </div>
-        <div class="field">
-          <label for="guest-plate">Biển số xe</label>
-          <input id="guest-plate" type="text" th:field="*{plateNumber}" maxlength="20" autocomplete="off" required />
-        </div>
-        <div class="field">
-          <label for="guest-vehicle-type">Loại phương tiện</label>
-          <select id="guest-vehicle-type" th:field="*{vehicleType}" required>
-            <option value="CAR">Ô tô</option>
-            <option value="MOTORBIKE">Xe máy</option>
-            <option value="ELECTRIC">Xe điện</option>
+        <div class="field" th:unless="${#lists.isEmpty(vehicles)}">
+          <label for="vehicleId">Xe của bạn</label>
+          <select id="vehicleId" th:field="*{vehicleId}" required>
+            <option value="">-- Chọn xe --</option>
+            <option th:each="vehicle : ${vehicles}"
+                    th:value="${vehicle.id}"
+                    th:text="${vehicle.licensePlate + ' (' + vehicle.vehicleType + ')'}"></option>
           </select>
+          <a class="back-link" id="register-vehicle-link" th:href="@{/vehicles/new}"
+             data-registration-url="/vehicles/new">Đăng ký thêm xe</a>
         </div>
         <div class="field">
           <label for="guest-date">Ngày đỗ xe</label>

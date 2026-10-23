@@ -9,6 +9,7 @@ import java.time.LocalTime;
 public class GuestReservationForm {
 
     private Long slotId;
+    private Long vehicleId;
     private String fullName;
     private String phone;
     private String plateNumber;
@@ -29,6 +30,14 @@ public class GuestReservationForm {
 
     public void setSlotId(Long slotId) {
         this.slotId = slotId;
+    }
+
+    public Long getVehicleId() {
+        return vehicleId;
+    }
+
+    public void setVehicleId(Long vehicleId) {
+        this.vehicleId = vehicleId;
     }
 
     public String getFullName() {

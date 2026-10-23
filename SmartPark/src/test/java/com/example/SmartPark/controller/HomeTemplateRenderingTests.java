@@ -2,7 +2,11 @@ package com.example.SmartPark.controller;
 
 import com.example.SmartPark.model.ParkingSlot;
 import com.example.SmartPark.model.ParkingSession;
+import com.example.SmartPark.model.Reservation;
+import com.example.SmartPark.model.User;
 import com.example.SmartPark.model.Vehicle;
+import com.example.SmartPark.repository.UserRepository;
+import com.example.SmartPark.repository.VehicleRepository;
 import com.example.SmartPark.service.ParkingSessionService;
 import com.example.SmartPark.service.ParkingSlotService;
 import com.example.SmartPark.service.ParkingSlotService.Stats;
@@ -18,13 +22,14 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import java.util.List;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -36,7 +41,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 
 @WebMvcTest(controllers = HomeController.class)
-@WithMockUser(roles = "USER")
+@WithMockUser(username = "test-user", roles = "USER")
 class HomeTemplateRenderingTests {
 
     @Autowired
@@ -51,6 +56,12 @@ class HomeTemplateRenderingTests {
     @MockitoBean
     private ReservationService reservationService;
 
+    @MockitoBean
+    private UserRepository userRepository;
+
+    @MockitoBean
+    private VehicleRepository vehicleRepository;
+
     @Test
     void rendersBackendSlotsAndStatsWithoutTemplateBindings() throws Exception {
         List<ParkingSlot> allSlots = List.of(
@@ -63,6 +74,13 @@ class HomeTemplateRenderingTests {
         when(parkingSlotService.filter("free")).thenReturn(List.of(allSlots.get(0), allSlots.get(3)));
         when(parkingSlotService.getStats()).thenReturn(new Stats(5, 2, 1));
         when(reservationService.getRecent()).thenReturn(List.of());
+        User owner = new User();
+        owner.setId(7L);
+        when(userRepository.findByEmail("test-user")).thenReturn(Optional.of(owner));
+        Vehicle vehicle = new Vehicle();
+        vehicle.setId(5L);
+        vehicle.setPlateNumber("51A-12345");
+        when(vehicleRepository.findByOwnerId(7L)).thenReturn(List.of(vehicle));
 
         mockMvc.perform(get("/user/parking")
                         .with(SecurityMockMvcRequestPostProcessors.user("test-user").roles("USER")))
@@ -75,6 +93,9 @@ class HomeTemplateRenderingTests {
                 .andExpect(content().string(containsString("B29")))
                 .andExpect(content().string(containsString("name=\"slotId\"")))
                 .andExpect(content().string(containsString("id=\"guest-reservation-dialog\"")))
+                .andExpect(content().string(containsString("name=\"vehicleId\"")))
+                .andExpect(content().string(containsString("value=\"5\"")))
+                .andExpect(content().string(containsString("51A-12345 (CAR)")))
                 .andExpect(content().string(containsString("id=\"open-booking\" type=\"button\" disabled")))
                 .andExpect(content().string(containsString("id=\"booking-mode-fixed\" type=\"checkbox\" checked disabled />")))
                 .andExpect(content().string(containsString("Đặt theo khung giờ cố định")))
@@ -91,6 +112,29 @@ class HomeTemplateRenderingTests {
                 .andExpect(content().string(containsString("Đã đặt")))
                 .andExpect(content().string(containsString("Bảo trì")))
                 .andExpect(content().string(not(containsString("th:each"))));
+        verify(vehicleRepository).findByOwnerId(7L);
+    }
+
+    @Test
+    void showsRegistrationPromptWhenCurrentUserHasNoVehicles() throws Exception {
+        List<ParkingSlot> slots = List.of(
+                slot("A01", "A", ParkingSlot.SlotType.STANDARD, ParkingSlot.SlotStatus.AVAILABLE));
+        when(parkingSlotService.filter("all")).thenReturn(slots);
+        when(parkingSlotService.filter("free")).thenReturn(slots);
+        when(parkingSlotService.getStats()).thenReturn(new Stats(1, 1, 0));
+        when(reservationService.getRecent()).thenReturn(List.of());
+        User owner = new User();
+        owner.setId(7L);
+        when(userRepository.findByEmail("test-user")).thenReturn(Optional.of(owner));
+        when(vehicleRepository.findByOwnerId(7L)).thenReturn(List.of());
+
+        mockMvc.perform(get("/user/parking")
+                        .with(SecurityMockMvcRequestPostProcessors.user("test-user").roles("USER")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(
+                        "Bạn chưa đăng ký xe. Vui lòng đăng ký xe trước khi đặt chỗ.")))
+                .andExpect(content().string(containsString("href=\"/vehicles/new\"")))
+                .andExpect(content().string(not(containsString("id=\"vehicleId\""))));
     }
 
     @Test
@@ -171,17 +215,58 @@ class HomeTemplateRenderingTests {
         ParkingSlot selected = slot("A05", "A", ParkingSlot.SlotType.VIP, ParkingSlot.SlotStatus.AVAILABLE);
         when(parkingSlotService.getById(selected.getId())).thenReturn(selected);
 
-        mockMvc.perform(get("/reservations/new").param("slotId", selected.getId().toString()))
+        mockMvc.perform(get("/reservations/new")
+                        .with(SecurityMockMvcRequestPostProcessors.user("test-user").roles("USER"))
+                        .param("slotId", selected.getId().toString()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("Reservation"))
                 .andExpect(content().string(containsString("A05")))
-                .andExpect(content().string(containsString("Thông tin liên hệ và phương tiện")))
-                .andExpect(content().string(containsString("Xác nhận đặt chỗ")));
+                .andExpect(content().string(containsString(
+                        "Bạn chưa đăng ký xe. Vui lòng đăng ký xe trước khi đặt chỗ.")))
+                .andExpect(content().string(containsString("href=\"/vehicles/new?slotId=")))
+                .andExpect(content().string(containsString("Xác nhận đặt chỗ")))
+                .andExpect(content().string(containsString("disabled=\"disabled\"")))
+                .andExpect(result -> {
+                    String body = result.getResponse().getContentAsString();
+                    int registrationLink = body.indexOf("vehicle-registration-link");
+                    int reservationForm = body.indexOf("<form class=\"guest-reservation-form\"");
+                    assertTrue(registrationLink >= 0 && registrationLink < reservationForm);
+                });
+    }
+
+    @Test
+    void reservationFormLoadsOnlyVehiclesOwnedByCurrentAccount() throws Exception {
+        ParkingSlot selected = slot("A05", "A", ParkingSlot.SlotType.VIP, ParkingSlot.SlotStatus.AVAILABLE);
+        User owner = new User();
+        owner.setId(7L);
+        Vehicle vehicle = new Vehicle();
+        vehicle.setId(5L);
+        vehicle.setPlateNumber("51A-12345");
+        vehicle.setVehicleType(Vehicle.VehicleType.CAR);
+        when(parkingSlotService.getById(selected.getId())).thenReturn(selected);
+        when(userRepository.findByEmail("test-user")).thenReturn(Optional.of(owner));
+        when(vehicleRepository.findByOwnerId(7L)).thenReturn(List.of(vehicle));
+
+        mockMvc.perform(get("/reservations/new")
+                        .with(SecurityMockMvcRequestPostProcessors.user("test-user").roles("USER"))
+                        .param("slotId", selected.getId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("value=\"5\"")))
+                .andExpect(content().string(containsString("51A-12345 (CAR)")))
+                .andExpect(result -> {
+                    String body = result.getResponse().getContentAsString();
+                    int registrationLink = body.indexOf("vehicle-registration-link");
+                    int reservationForm = body.indexOf("<form class=\"guest-reservation-form\"");
+                    assertTrue(registrationLink >= 0 && registrationLink < reservationForm);
+                });
+
+        verify(vehicleRepository).findByOwnerId(7L);
     }
 
     @Test
     void guestReservationApiReturnsValidationErrorsAsJson() throws Exception {
         mockMvc.perform(post("/reservations/guest")
+                        .with(SecurityMockMvcRequestPostProcessors.user("test-user").roles("USER"))
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .header("Accept", "application/json")
                         .param("slotId", "1")
@@ -199,21 +284,77 @@ class HomeTemplateRenderingTests {
     }
 
     @Test
-    void guestReservationApiReturnsNotFoundSlotAsBadRequestJson() throws Exception {
-        doThrow(new IllegalArgumentException("Không tìm thấy vị trí đỗ"))
-                .when(reservationService).createGuest(
-                        anyString(), anyString(), anyString(),
-                        any(com.example.SmartPark.model.Vehicle.VehicleType.class),
-                        anyLong(), any(LocalDate.class), any(LocalTime.class), any(LocalTime.class));
+    void reservationApiReturnsHelpfulErrorWhenVehicleIsNotSelected() throws Exception {
+        mockMvc.perform(post("/reservations/guest")
+                        .with(SecurityMockMvcRequestPostProcessors.user("test-user").roles("USER"))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .header("Accept", "application/json")
+                        .param("slotId", "1")
+                        .param("date", "2030-01-01")
+                        .param("startTime", "08:00")
+                        .param("endTime", "09:00"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value(
+                        "Vui lòng chọn xe đã đăng ký trước khi đặt chỗ."));
+    }
+
+    @Test
+    void reservationApiCreatesReservationFromSubmittedForm() throws Exception {
+        User user = new User();
+        user.setId(7L);
+        when(userRepository.findByEmail("test-user")).thenReturn(Optional.of(user));
+        Reservation reservation = new Reservation();
+        reservation.setId(42L);
+        when(reservationService.create(
+                7L,
+                5L,
+                1L,
+                LocalDate.of(2030, 1, 1),
+                LocalTime.of(8, 0),
+                LocalTime.of(9, 0)))
+                .thenReturn(reservation);
 
         mockMvc.perform(post("/reservations/guest")
+                        .with(SecurityMockMvcRequestPostProcessors.user("test-user").roles("USER"))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .header("Accept", "application/json")
+                        .param("slotId", "1")
+                        .param("vehicleId", "5")
+                        .param("date", "2030-01-01")
+                        .param("startTime", "08:00")
+                        .param("endTime", "09:00"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("application/json"))
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value(
+                        "Yêu cầu đặt chỗ 42 đã được gửi và đang chờ xác nhận."));
+
+        verify(reservationService).create(
+                7L,
+                5L,
+                1L,
+                LocalDate.of(2030, 1, 1),
+                LocalTime.of(8, 0),
+                LocalTime.of(9, 0));
+    }
+
+    @Test
+    void guestReservationApiReturnsNotFoundSlotAsBadRequestJson() throws Exception {
+        User user = new User();
+        user.setId(7L);
+        when(userRepository.findByEmail("test-user")).thenReturn(Optional.of(user));
+        doThrow(new IllegalArgumentException("Không tìm thấy vị trí đỗ"))
+                .when(reservationService).create(
+                        anyLong(), anyLong(), anyLong(),
+                        any(LocalDate.class), any(LocalTime.class), any(LocalTime.class));
+
+        mockMvc.perform(post("/reservations/guest")
+                        .with(SecurityMockMvcRequestPostProcessors.user("test-user").roles("USER"))
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .header("Accept", "application/json")
                         .param("slotId", "99999")
-                        .param("fullName", "Khách kiểm thử")
-                        .param("phone", "0912345678")
-                        .param("plateNumber", "51A-12345")
-                        .param("vehicleType", "CAR")
+                        .param("vehicleId", "5")
                         .param("date", "2030-01-01")
                         .param("startTime", "08:00")
                         .param("endTime", "09:00"))

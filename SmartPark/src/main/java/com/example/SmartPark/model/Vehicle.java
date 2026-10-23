@@ -16,12 +16,18 @@ public class Vehicle {
     @Column(name = "license_plate", nullable = false, unique = true, length = 20)
     private String licensePlate;
 
+    @Column(length = 80)
+    private String brand;
+
+    @Column(length = 40)
+    private String color;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private VehicleType vehicleType = VehicleType.CAR;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id")
+    @JoinColumn(name = "user_id")
     private User owner;
 
     public Vehicle() {}
@@ -35,6 +41,12 @@ public class Vehicle {
         this.licensePlate = plateNumber;
     }
     public String getLicensePlate() { return licensePlate; }
+
+    public String getBrand() { return brand; }
+    public void setBrand(String brand) { this.brand = brand; }
+
+    public String getColor() { return color; }
+    public void setColor(String color) { this.color = color; }
 
     public VehicleType getVehicleType() { return vehicleType; }
     public void setVehicleType(VehicleType vehicleType) { this.vehicleType = vehicleType; }

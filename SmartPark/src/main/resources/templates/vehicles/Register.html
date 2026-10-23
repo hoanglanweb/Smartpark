@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#F4F3EE" />
+    <title>SmartPark | Đăng ký xe</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <link rel="stylesheet" th:href="@{/css/fontfamily.css}" />
+    <link rel="stylesheet" th:href="@{/css/vehicles.css}" />
+  </head>
+  <body>
+    <a class="skip-link" href="#vehicle-registration-main">Bỏ qua điều hướng</a>
+    <div class="booking-shell vehicle-registration-page">
+      <header class="booking-header">
+        <a class="brand" th:href="@{/user/parking}" aria-label="SmartPark, trở về sơ đồ bãi đỗ">
+          <span class="brand-mark" aria-hidden="true"><i class="fa-solid fa-square-parking"></i></span>
+          <span class="brand-name">SmartPark</span>
+        </a>
+        <a class="back-link" th:href="${vehicleRegistrationForm.slotId != null} ? @{/reservations/new(slotId=${vehicleRegistrationForm.slotId})} : @{/user/parking}">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+          <span th:text="${vehicleRegistrationForm.slotId != null} ? 'Quay lại đặt chỗ' : 'Trở về sơ đồ'">Quay lại đặt chỗ</span>
+        </a>
+      </header>
+
+      <main class="booking-main" id="vehicle-registration-main">
+        <p class="breadcrumb">SmartPark <span aria-hidden="true">/</span> Phương tiện</p>
+        <div class="vehicle-registration-layout">
+          <section class="vehicle-registration-intro" aria-labelledby="vehicle-registration-title">
+            <h1 id="vehicle-registration-title">Thêm xe vào tài khoản</h1>
+            <p>Đăng ký phương tiện một lần để chọn nhanh khi đặt chỗ.</p>
+            <div class="vehicle-registration-note">
+              <strong>Thông tin được lưu cùng tài khoản của bạn</strong>
+              <span>Chỉ bạn mới có thể xem và sử dụng xe này.</span>
+            </div>
+          </section>
+
+          <section class="guest-form-panel vehicle-registration-panel" aria-labelledby="vehicle-registration-form-title">
+            <div class="vehicle-registration-heading">
+              <h2 id="vehicle-registration-form-title">Thông tin phương tiện</h2>
+              <p>Nhập thông tin xe của bạn.</p>
+            </div>
+            <p class="inline-message error-message" role="alert"
+               th:if="${vehicleRegistrationError != null}" th:text="${vehicleRegistrationError}"></p>
+            <form class="vehicle-registration-form" th:action="@{/vehicles}" th:object="${vehicleRegistrationForm}" method="post">
+              <input type="hidden" th:field="*{slotId}" />
+              <div class="field">
+                <label for="vehicle-plate-number">Biển số xe</label>
+                <input id="vehicle-plate-number" type="text" th:field="*{plateNumber}"
+                       maxlength="20" autocomplete="off" required />
+              </div>
+              <div class="field">
+                <label for="vehicle-type">Loại xe</label>
+                <select id="vehicle-type" th:field="*{vehicleType}" required>
+                  <option value="CAR">Ô tô</option>
+                  <option value="MOTORBIKE">Xe máy</option>
+                  <option value="ELECTRIC">Xe điện</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="vehicle-brand">Hãng xe</label>
+                <input id="vehicle-brand" type="text" th:field="*{brand}" maxlength="80" autocomplete="off" />
+              </div>
+              <div class="field">
+                <label for="vehicle-color">Màu xe</label>
+                <input id="vehicle-color" type="text" th:field="*{color}" maxlength="40" autocomplete="off" />
+              </div>
+              <p class="vehicle-registration-guidance">Biển số xe chỉ có thể được đăng ký một lần trong hệ thống.</p>
+              <button class="button button-primary button-full" type="submit">
+                <i class="fa-solid fa-plus" aria-hidden="true"></i>Đăng ký xe
+              </button>
+            </form>
+          </section>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

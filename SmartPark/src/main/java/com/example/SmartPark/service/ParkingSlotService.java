@@ -83,7 +83,7 @@ public class ParkingSlotService {
                 slotRepo.countByStatus(SlotStatus.OCCUPIED));
     }
 
-    //?:** Tìm kiếm danh sách các ô đỗ xe thời trống thực tế
+    //?:** Tìm kiếm danh sách các ô đỗ xe thời trống tbhực tế
     @Transactional(readOnly = true)
     public List<ParkingSlot> findFreeSlots(LocalDateTime start, LocalDateTime end) {
         validateTimeWindow(start, end);
@@ -101,6 +101,7 @@ public class ParkingSlotService {
                 .toList();
     }
 
+    //?: nếu như đặt giờ sai -> thông báo 
     public void validateTimeWindow(LocalDateTime start, LocalDateTime end) {
         if (start == null || end == null || !end.isAfter(start)) {
             throw new IllegalArgumentException("Giờ kết thúc phải sau giờ bắt đầu");
@@ -110,7 +111,7 @@ public class ParkingSlotService {
         }
     }
 
-    //?:** true nếu ô đã có đặt chỗ trùng khoảng thời gian */
+    //?:true nếu ô đã có đặt chỗ trùng khoảng thời gian 
     public boolean isReserved(Long slotId, LocalDateTime start, LocalDateTime end) {
         if (slotId == null) {
             throw new IllegalArgumentException("Cần chọn một vị trí đỗ");

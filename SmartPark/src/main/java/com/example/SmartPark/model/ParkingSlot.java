@@ -39,7 +39,7 @@ public class ParkingSlot {
     @Column(name = "STATUS", nullable = false, length = 20)
     private SlotStatus status = SlotStatus.AVAILABLE;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)  
     @JoinColumn(name = "lot_id", nullable = false)
     private ParkingLot lot;
 

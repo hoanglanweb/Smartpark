@@ -76,7 +76,9 @@ class ReservationServiceTests {
     @Test
     void serializesSlotAvailabilityCheckAndRejectsOverlappingReservation() {
         User user = new User();
+        user.setId(1L);
         Vehicle vehicle = new Vehicle();
+        vehicle.setOwner(user);
         ParkingSlot slot = availableSlot();
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(vehicleRepository.findById(2L)).thenReturn(Optional.of(vehicle));
@@ -95,7 +97,9 @@ class ReservationServiceTests {
     @Test
     void createsPendingReservationWhenSlotIsAvailable() {
         User user = new User();
+        user.setId(1L);
         Vehicle vehicle = new Vehicle();
+        vehicle.setOwner(user);
         ParkingSlot slot = availableSlot();
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(vehicleRepository.findById(2L)).thenReturn(Optional.of(vehicle));
@@ -109,6 +113,8 @@ class ReservationServiceTests {
         Reservation created = reservationService.create(1L, 2L, 3L, futureStart(), futureEnd());
 
         assertEquals(Reservation.Status.PENDING, created.getStatus());
+        assertEquals(user, created.getUser());
+        assertEquals(vehicle, created.getVehicle());
         assertEquals(slot, created.getSlot());
         verify(slotRepository).findByIdForUpdate(3L);
         verify(reservationRepository).save(created);

@@ -19,6 +19,7 @@
   const dialogSlotCode = document.getElementById("dialog-slot-code");
   const errorMessage = document.getElementById("booking-error");
   const successMessage = document.getElementById("booking-success");
+  const registerVehicleLink = document.getElementById("register-vehicle-link");
   const slotButtons = [
     ...document.querySelectorAll(".parking-slot[data-slot-id]"),
   ];
@@ -33,6 +34,21 @@
   }
 
   let selectedSlot = null;
+
+  const updateVehicleRegistrationLink = (slotId) => {
+    if (!registerVehicleLink) {
+      return;
+    }
+
+    const url = new URL(
+      registerVehicleLink.dataset.registrationUrl,
+      window.location.origin
+    );
+    if (slotId) {
+      url.searchParams.set("slotId", slotId);
+    }
+    registerVehicleLink.href = url.toString();
+  };
 
   // Hiển thị thông báo
   const displayMessage = (element, message) => {
@@ -62,6 +78,7 @@
     });
 
     selectedSlot = null;
+    updateVehicleRegistrationLink(null);
 
     slotIdInput.value = "";
     if (checkOutSlotId) {
@@ -131,6 +148,7 @@
         : "AVAILABLE",
     };
 
+    updateVehicleRegistrationLink(selectedSlot.id);
     slotIdInput.value = selectedSlot.id;
     if (checkOutSlotId) {
       checkOutSlotId.value = selectedSlot.id;
@@ -355,6 +373,15 @@
     }
 
     if (!bookingForm.reportValidity()) {
+      return;
+    }
+    const vehicleInput = document.getElementById("vehicleId");
+
+    if (!vehicleInput || !vehicleInput.value) {
+      displayMessage(
+        errorMessage,
+        "Vui lòng chọn xe trước khi gửi yêu cầu đặt chỗ."
+      );
       return;
     }
 

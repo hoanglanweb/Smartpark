@@ -615,7 +615,9 @@ a {
   gap: 12px;
   margin-bottom: 14px;
 }
-
+#zone-a-title{
+  color: #e7b84b;
+}
 .zone-heading h3 {
   margin: 0;
   font-size: 15px;
@@ -662,7 +664,9 @@ a {
   gap: 8px;
   min-width: 0;
 }
-
+#slot-grid-vip button{
+  background: #e7b84b;
+}
 .parking-slot {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -674,7 +678,7 @@ a {
   justify-content: center;
   padding: 10px 5px;
   border: 1px solid #88a83b;
-  border-radius: 8px;
+  /* border-radius: 8px; */
   background: #edf4dd;
   color: #334319;
   cursor: pointer;
@@ -1132,7 +1136,7 @@ a {
   padding: 24px;
   overflow-y: auto;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  /* border-radius: var(--radius); */
   background: var(--surface);
   color: var(--text);
   box-shadow: 0 24px 70px rgb(32 35 31 / 22%);
@@ -1207,6 +1211,7 @@ a {
   color: #344d57;
   font-size: 12px;
 }
+
 
 
 /* ---------------------Reponsive Moblie-------------------- */

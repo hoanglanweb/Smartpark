@@ -33,6 +33,8 @@ public class SecurityConfig {
                         //!: chỉ cho phép ADMIN được truy cập.
                         .requestMatchers("/admin/**", "/parking-sessions/**")
                         .hasRole("ADMIN") //!: -> phần quyền ADMIN
+                        .requestMatchers("/vehicles/**")
+                        .hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/user/**", "/reservations/**") //!: các chức năng người dùng và đặt chỗ.
                         .hasAnyRole("USER", "ADMIN") 
                         .anyRequest() //!: -> tất cả URL khác yêu cầu đăng nhập

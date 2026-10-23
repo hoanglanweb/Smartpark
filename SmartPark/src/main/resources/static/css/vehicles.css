@@ -1,0 +1,253 @@
+
+.reservation-page .booking-main {
+  width: min(1080px, 100%);
+  padding-top: clamp(28px, 5vw, 52px);
+}
+
+.reservation-page .booking-intro {
+  margin-bottom: 28px;
+}
+
+.reservation-page .booking-intro h1 {
+  font-size: clamp(28px, 4vw, 40px);
+  letter-spacing: -0.045em;
+}
+
+.reservation-page .booking-content {
+  grid-template-columns: minmax(220px, 0.78fr) minmax(0, 1.22fr);
+  gap: 22px;
+}
+
+.reservation-page .booking-slot-summary,
+.reservation-page .guest-form-panel {
+  border-radius: 14px;
+}
+
+.reservation-page .booking-slot-summary {
+  border-top: 3px solid var(--accent);
+  background: var(--surface-muted);
+}
+
+.reservation-page .guest-form-panel {
+  padding: clamp(20px, 3vw, 30px);
+  box-shadow: 0 14px 32px rgb(32 35 31 / 6%);
+}
+
+.reservation-page .guest-form-panel>.content-heading {
+  margin-bottom: 22px;
+}
+
+.reservation-page .guest-form-panel h2 {
+  font-size: 20px;
+}
+
+.reservation-page .guest-reservation-form {
+  gap: 18px;
+}
+
+.reservation-page .field {
+  gap: 8px;
+}
+
+.reservation-page .field label {
+  font-size: 13px;
+}
+
+.reservation-page .field input,
+.reservation-page .field select {
+  min-height: 48px;
+  padding: 10px 12px;
+}
+
+.reservation-page .guest-reservation-form > .button:disabled {
+  border-color: #c4c8bf;
+  background: #d9dbd5;
+  color: #434943;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.vehicle-registration-link {
+  width: fit-content;
+  min-width: 180px;
+  margin: 0 0 20px;
+}
+
+.vehicle-registration-page .booking-main {
+  width: min(1100px, 100%);
+  padding-top: clamp(26px, 5vw, 54px);
+}
+
+.vehicle-registration-page .breadcrumb {
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.vehicle-registration-layout {
+  display: grid;
+  grid-template-columns: minmax(250px, 0.8fr) minmax(0, 1.2fr);
+  align-items: start;
+  gap: clamp(24px, 5vw, 64px);
+}
+
+.vehicle-registration-intro {
+  padding-top: 14px;
+}
+
+.vehicle-registration-mark {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  margin-bottom: 24px;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--accent);
+  color: var(--text);
+  font-size: 23px;
+}
+
+.vehicle-registration-intro h1 {
+  max-width: 9ch;
+  margin: 0;
+  font-size: clamp(32px, 4.6vw, 48px);
+  font-weight: 780;
+  letter-spacing: -0.055em;
+  line-height: 1.08;
+}
+
+.vehicle-registration-intro > p {
+  max-width: 34ch;
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.vehicle-registration-note {
+  display: grid;
+  gap: 5px;
+  margin-top: 34px;
+  padding: 15px 0 0;
+  border-top: 1px solid var(--border);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.vehicle-registration-note span {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.vehicle-registration-panel {
+  padding: clamp(20px, 3vw, 30px);
+  border-radius: 14px;
+  box-shadow: 0 14px 32px rgb(32 35 31 / 6%);
+}
+
+.vehicle-registration-heading {
+  margin-bottom: 23px;
+}
+
+.vehicle-registration-heading h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 750;
+}
+
+.vehicle-registration-heading p {
+  margin: 5px 0 0;
+  color: var(--muted);
+}
+
+.vehicle-registration-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 14px;
+}
+
+.vehicle-registration-form .field {
+  gap: 8px;
+}
+
+.vehicle-registration-form .field label {
+  font-size: 13px;
+}
+
+.vehicle-registration-form .field input,
+.vehicle-registration-form .field select {
+  min-height: 48px;
+  padding: 10px 12px;
+}
+
+.vehicle-registration-guidance {
+  grid-column: 1 / -1;
+  margin: -2px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.vehicle-registration-form > .button {
+  grid-column: 1 / -1;
+  min-height: 50px;
+  margin-top: 2px;
+}
+
+@media (max-width: 767px) {
+  .reservation-page .booking-content {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .reservation-page .booking-slot-summary,
+  .reservation-page .guest-form-panel {
+    padding: 18px;
+  }
+
+  .vehicle-registration-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .vehicle-registration-intro {
+    padding-top: 0;
+  }
+
+  .vehicle-registration-mark {
+    width: 46px;
+    height: 46px;
+    margin-bottom: 17px;
+    border-radius: 12px;
+    font-size: 20px;
+  }
+
+  .vehicle-registration-intro h1 {
+    max-width: 15ch;
+    font-size: clamp(30px, 9vw, 40px);
+  }
+
+  .vehicle-registration-note {
+    margin-top: 20px;
+  }
+
+  .vehicle-registration-panel {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .vehicle-registration-form {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 15px;
+  }
+
+  .vehicle-registration-guidance,
+  .vehicle-registration-form > .button {
+    grid-column: auto;
+  }
+
+  .vehicle-registration-link {
+    width: 100%;
+  }
+}

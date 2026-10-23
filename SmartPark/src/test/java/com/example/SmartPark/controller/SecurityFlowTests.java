@@ -1,6 +1,8 @@
 package com.example.SmartPark.controller;
 
 import com.example.SmartPark.config.SecurityConfig;
+import com.example.SmartPark.repository.UserRepository;
+import com.example.SmartPark.repository.VehicleRepository;
 import com.example.SmartPark.service.ParkingSlotService;
 import com.example.SmartPark.service.ParkingSessionService;
 import com.example.SmartPark.service.ReservationService;
@@ -64,6 +66,12 @@ class SecurityFlowTests {
 
     @MockitoBean
     private SmartParkUserDetailsService userDetailsService;
+
+    @MockitoBean
+    private UserRepository userRepository;
+
+    @MockitoBean
+    private VehicleRepository vehicleRepository;
 
     @Test
     void publicLandingAndAuthenticationPagesRender() throws Exception {

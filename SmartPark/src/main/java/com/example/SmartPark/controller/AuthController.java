@@ -2,6 +2,7 @@ package com.example.SmartPark.controller;
 
 import com.example.SmartPark.model.RegisterForm;
 import com.example.SmartPark.service.RegistrationService;
+
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,15 +32,14 @@ public class AuthController {
         }
         return "auth/Register";
     }
-    
-    //?: tiếp nhận dữ liệu người dùng đăng ký
+    // ?: tiếp nhận dữ liệu người dùng đăng ký
     @PostMapping("/register")
     public String register(
             @ModelAttribute("registerForm") RegisterForm form,
             Model model,
             RedirectAttributes redirectAttributes) {
         try {
-            //!: gọi service để kiểm tra dữ liệu và tài khoản. 
+            // !: gọi service để kiểm tra dữ liệu và tài khoản.
             registrationService.register(form);
             redirectAttributes.addFlashAttribute(
                     "registrationSuccess", "Tạo tài khoản thành công. Vui lòng đăng nhập.");
